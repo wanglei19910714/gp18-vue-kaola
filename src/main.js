@@ -12,6 +12,7 @@ Vue.use(Vant);
 
 Vue.config.productionTip = false
 
+//test
 new Vue({
   router,
   store,
