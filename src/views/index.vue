@@ -6,16 +6,16 @@
     <footer>
       <ul>
         <router-link tag="li" to="/index/home">
-          <img :src="`/img/${footerImg.home}`" alt @click="handleClick('home')" />
+          <img :src="`/img/footer/${footerImg.home}`" alt @click="handleClick('home')" />
         </router-link>
         <router-link tag="li" to="/index/category">
-          <img :src="`/img/${footerImg.category}`" alt @click="handleClick('category')" />
+          <img :src="`/img/footer/${footerImg.category}`" alt @click="handleClick('category')" />
         </router-link>
         <router-link tag="li" to="/index/shop">
-          <img :src="`/img/${footerImg.shop}`" alt @click="handleClick('shop')" />
+          <img :src="`/img/footer/${footerImg.shop}`" alt @click="handleClick('shop')" />
         </router-link>
         <router-link tag="li" to="/index/profile">
-          <img :src="`/img/${footerImg.profile}`" alt @click="handleClick('profile')" />
+          <img :src="`/img/footer/${footerImg.profile}`" alt @click="handleClick('profile')" />
         </router-link>
       </ul>
     </footer>
@@ -57,7 +57,7 @@ export default {
   flex-direction: column;
   main {
     flex: 1;
-    overflow: hidden;
+    overflow: auto;
   }
   footer {
     height: 49px;
