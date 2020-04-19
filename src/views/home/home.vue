@@ -1,220 +1,208 @@
 <template>
   <div class="home-page">
-    <Ad></Ad>
+    <Ad v-show="isShowAd"></Ad>
     <!-- 头部 -->
-    <header>
-      <div class="input-wrapper">
-        <van-icon name="search" color="#f00" size="15" class="my-icon" />
-        <input type="text" placeholder="象印保温杯" />
-      </div>
-      <div class="btn">登录/注册</div>
-    </header>
-    <!-- 轮播图 -->
-    <div class="banner">
-      <van-swipe
-        class="my-swipe"
-        :autoplay="2000"
-        indicator-color="white"
-        :height="224"
-        @change="onChange"
-      >
-        <van-swipe-item v-for="n in bannerNum" :key="n">
-          <img :src="`/img/banner/${n}.jpg`" alt />
-        </van-swipe-item>
-        <template #indicator>
-          <div class="custom-indicator">
-            <span>{{ current + 1 }}</span>/
-            <span>{{bannerNum}}</span>
+    <Header></Header>
+
+    <div class="scroll-wrapper" ref="scrollWrapper">
+      <div class="scroll-content">
+        <!-- 轮播图 -->
+        <div>
+          <Banner :bannerList="bannerList"></Banner>
+        </div>
+
+        <!-- 一张图片 -->
+        <div class="image-row">
+          <img src="img/image-row.png" alt />
+        </div>
+
+        <!-- 宫格 -->
+        <div class="icon-slide">
+          <Grid :iconList="iconList"></Grid>
+        </div>
+
+        <!-- 广告 -->
+        <div class="ad">
+          <img
+            src="https://kaola-haitao.oss.kaolacdn.com/dc80288c-c65e-4903-bbeb-da5a74bff3acT2004091444_900_225.png"
+            alt
+          />
+        </div>
+
+        <!-- 必买清单 -->
+        <Manifest :wellList="wellList"></Manifest>
+
+        <!-- 为你推荐 -->
+        <div class="goods">
+          <div class="best">
+            <img
+              src="https://kaola-haitao.oss.kaolacdn.com/61556274-32ef-44bf-84af-b3d4485ac157.png"
+              alt
+              class="timg"
+            />
           </div>
-        </template>
-      </van-swipe>
-    </div>
-    <!-- 一张图片 -->
-    <div class="image-row">
-      <img src="img/image-row.png" alt />
-    </div>
-    <!-- 宫格 -->
-    <div class="icon-slide">
-      <van-grid :border="false" :column-num="5" icon-size="75px">
-        <van-grid-item v-for="(item,index) in iconList" :key="index">
-          <van-image :src="item" />
-        </van-grid-item>
-      </van-grid>
-    </div>
-    <div class="ad">
-      <img src="https://kaola-haitao.oss.kaolacdn.com/dc80288c-c65e-4903-bbeb-da5a74bff3acT2004091444_900_225.png" alt="">
-    </div>
-    <!-- 必买清单 -->
-    <div class="channel">
-       <div class="block" v-for="(item,index) in wellList" :key="index">
-         <div class="title">
-           <span class="mainTitle">{{item.title}}</span>
-           <span class="subTitle">{{item.subTitle}}</span>
-         </div>
-         <div class="img">
-           <img :src="item.imgUrl1" alt="">
-           <img :src="item.imgUrl2" alt="">
-         </div>
-       </div>
-    </div>
-    
-    <!-- 为你推荐 -->
-    <div class="best">
-       <img src="https://kaola-haitao.oss.kaolacdn.com/61556274-32ef-44bf-84af-b3d4485ac157.png" alt="" class="timg">
+          <div class="list">
+            <ListItem v-for="item  in  goodsList" :key="item.goodsId" :item="item"></ListItem>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
 import Ad from "../../components/Ad";
+import Header from "./components/header";
+import Banner from "./components/banner";
+import Grid from "./components/grid";
+import Manifest from "./components/manifest";
+import ListItem from "./components/list-item";
+import { Toast } from "vant";
+
+import BScroll from "@better-scroll/core";
+import Pullup from "@better-scroll/pull-up";
+import PullDown from '@better-scroll/pull-down'
+BScroll.use(PullDown)
+BScroll.use(Pullup);
 
 export default {
   components: {
-    Ad
+    Ad,
+    Header,
+    Banner,
+    Grid,
+    Manifest,
+    ListItem
   },
- data(){
-   return {
-       bannerNum: 8,
-      current: 0,
-     iconList:[],
-     wellList:[]
-   }
- },
- async created(){
-      let rs = await this.$http.get('/api/home/dataList')
-       this.iconList = rs.data.iconList
-      
-       this.wellList = rs.data.wellList
+  data() {
+    return {
+      isShowAd:true,
+      pageNo: 4,
+      iconList: [],
+      wellList: [],
+      bannerList: [],
+      goodsList: [],
+      hasMore: true
+    };
   },
- 
+  async created() {
+    let rs = await this.$http.get("/api/home/dataList");
+    this.iconList = rs.data.iconList;
+    this.wellList = rs.data.wellList;
+    this.bannerList = rs.data.bannerList;
+
+    let result = await this.getGoodsList();
+    this.goodsList = result.data.data.home[1].globalGoodsItemList;
+
+    this.$nextTick(() => {
+      this.initBscroll();
+    });
+  },
+
   methods: {
-    onChange(index) {
-      this.current = index;
+    getGoodsList() {
+      return this.$http.get(
+        "/kaola/home/index.html?t=1587187659405&pageNo=" + this.pageNo
+      );
+      // console.log(result.data.data.home[1].globalGoodsItemList);
+      //  console.log(result.data.data);
+      // this.goodsList = result.data.data.home[1].globalGoodsItemList;
+    },
+
+    initBscroll() {
+      this.bscroll = new BScroll(this.$refs.scrollWrapper, {
+        scrollY: true,
+        pullUpLoad: true,
+         pullDownRefresh: {
+            threshold: 40,
+            stop: 0
+          }
+      });
+      //加载更多
+      this.bscroll.on("pullingUp", this.pullingUpHandler.bind(this));
+      
+      //最新数据
+      this.bscroll.on('pullingDown', this.pullingDownHandler.bind(this))
+      this.bscroll.on('scrollEnd', this.scrollHandler.bind(this))
+
+    },
+    scrollHandler(pos){
+      if(pos.y<-30){
+          this.isShowAd = false
+      }else{
+        this.isShowAd = true
+      }
+      
+    },
+    async pullingDownHandler(){
+      this.pageNo=4;
+      let rs = await this.getGoodsList();
+       this.goodsList = rs.data.data.home[1].globalGoodsItemList;
+       this.bscroll.finishPullDown()
+       this.bscroll.refresh();
+    },
+    async pullingUpHandler() {
+      if (!this.hasMore) {
+        Toast({
+          message: "没有更多内容了",
+          position: "bottom"
+        });
+          this.bscroll.finishPullUp();
+          return
+      }
+      this.pageNo++;
+      let rs = await this.getGoodsList();
+      if (!rs.data.data.hasMore) {
+        this.hasMore = false;
+      }
+     if(rs.data.data.home.length!=0){
+       this.goodsList.push(...rs.data.data.home[0].globalGoodsItemList) 
+     }
+      this.bscroll.finishPullUp();
+      this.bscroll.refresh();
     }
   }
 };
 </script>
  
 <style lang="scss" scoped>
-@import "../../assets/style/mixin.scss";
 .home-page {
-  header {
-    height: 45px;
-    padding: 0 16px 0 6px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    // border: 1px solid lawngreen;
-    .input-wrapper {
-      display: flex;
-      align-items: center;
-      width: 268px;
-      height: 30px;
-      border-radius: 30px;
-      border: 2px solid #f00;
-      .my-icon {
-        padding-left: 10px;
-        font-weight: 800;
-      }
-      input {
-        flex: 0.9;
-        border: 0;
-        height: 26px;
-        font-size: 13px;
-        color: #727273;
-      }
-    }
-    .btn {
-      width: 62px;
-      height: 30px;
-      font-size: 12px;
-      border: 1px solid #f00;
-      color: #f00;
-      text-align: center;
-      line-height: 30px;
-      border-radius: 3px;
-    }
-  }
-  .banner {
-    height: 224px;
-    img {
-      width: 100%;
-      height: 224;
-    }
-
-    .custom-indicator {
-      position: absolute;
-      left: 5px;
-      bottom: 5px;
-      padding: 2px 5px;
-      font-size: 12px;
-      color: #fff;
-      // background: rgba(0, 0, 0, 0.8);
-      span {
-        display: inline-block;
-        width: 15px;
-        height: 15px;
-        border: 1px solid rgba(0, 0, 0, 0.8);
-        border-radius: 15px;
-        text-align: center;
-      }
-    }
-  }
-  .image-row {
-    height: 22px;
-    img {
-      height: 100%;
-      width: 100%;
-    }
-  }
-
-  .icon-slide {
-    /deep/ {
-      .van-grid-item__content {
-        padding: 0;
-      }
-    }
-  }
- .ad{
-   img{
-     width: 100%;
-   }
- }
-  .channel{
-    height: 154px;
-    display: flex;
-    // border: 1px solid black;
-    .block{
-      flex: 1;
-      padding: 10px 0 0 15px;
-      .title{
-        margin-bottom: 18px;
-        .mainTitle{
-          font-size: 17px;
-          font-weight: 600;
-          color: #333;
-          padding-right: 4px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .scroll-wrapper {
+    height: 100%;
+    flex: 1;
+    overflow: hidden;
+    .scroll-content {
+      .image-row {
+        height: 22px;
+        img {
+          height: 100%;
+          width: 100%;
         }
-        .subTitle{
-          font-size: 12px;
+      }
+      .ad {
+        img {
+          width: 100%;
+        }
+      }
+
+      .goods {
+        .best {
+          .timg {
+            display: block;
+            height: 61px;
+          }
         }
 
+        .list {
+          background: #f2f2f2;
+          padding: 5px;
+          display: flex;
+          flex-wrap: wrap;
+        }
       }
-      img{
-        width: 77px;
-        height: 77px;
-      }
-    }
-    .block:nth-of-type(1){
-      @include border_1px('right',rgb(236, 230, 230));
-    }
-  }
-
-  .best{
-    .timg{
-      height: 61px;
     }
   }
 }
-
- 
 </style>

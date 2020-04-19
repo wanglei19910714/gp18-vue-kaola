@@ -2,7 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 import Index from '../views/index.vue'
-import Detail from '../views/detail'
+import Channel from '../views/channel'
+import Test from '../views/test.vue'
 import Home from '../views/home/home.vue'
 import Category from '../views/category/category.vue'
 import Shop from '../views/shop/shop.vue'
@@ -11,6 +12,16 @@ import Profile from '../views/profile/profile.vue'
 Vue.use(VueRouter)
 
   const routes = [
+    {
+      path: '/channel',
+      name: 'channel',
+      component:Channel
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component:Test
+    },
   {
     path:'/',
     redirect:"/index",
@@ -41,11 +52,7 @@ Vue.use(VueRouter)
     ]
 
   },
-  {
-    path: '/detail',
-    name: 'detail',
-    component:Detail
-  },
+ 
 ]
 
 const router = new VueRouter({

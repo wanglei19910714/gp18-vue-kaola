@@ -3,18 +3,18 @@ const path = require('path')
 module.exports = {
   devServer: {
     proxy: {
-    //   '/ajax': {
-    //     target: "https://m.kaola.com",
-    //     changeOrigin: true,
-    //     pathRewrite: {
-    //         "^/ajax":""
-    //     }
-    //   },
-      '/maoyan':{
-        target: "http://m.maoyan.com",
+      '^/kaola':{
+        target: "https://m.kaola.com",
         changeOrigin: true,
         pathRewrite: {
-          "^/maoyan":""
+          "^/kaola":""
+        }
+      },
+      '^/pageskaola':{
+        target: "https://pages.kaola.com/",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/pageskaola":""
         }
       }
       
