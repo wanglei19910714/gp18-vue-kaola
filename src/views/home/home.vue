@@ -110,6 +110,7 @@ export default {
 
     initBscroll() {
       this.bscroll = new BScroll(this.$refs.scrollWrapper, {
+        click:true,
         scrollY: true,
         pullUpLoad: true,
          pullDownRefresh: {
